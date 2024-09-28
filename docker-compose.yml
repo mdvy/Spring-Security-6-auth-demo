@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+  postgresql:
+    container_name: security-db
+    image: postgres
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+      POSTGRES_DB: security_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+#      - "./src/main/resources/data.sql:/docker-entrypoint-initdb.d/data.sql"
+      - "./data:/var/lib/postgresql/data"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d security_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app-network
+
+#  app:
+#    container_name: security-app
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8080:8080"
+#    expose:
+#      - "8080"
+#    restart: always
+#    depends_on:
+#      postgresql:
+#        condition: service_healthy
+#    networks:
+#      - app-network
+
+
+networks:
+  app-network:
+    driver: bridge
+
+
