@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import ru.medov.security_demo.domain.Permission;
 import ru.medov.security_demo.domain.Role;
 
 import static org.springframework.http.HttpMethod.*;
@@ -31,9 +32,9 @@ public class SecurityConfig {
                         .csrf(AbstractHttpConfigurer::disable)
                         .authorizeHttpRequests(auth->auth
                                 .requestMatchers( "/welcome").permitAll()
-                                .requestMatchers(GET, "/api/v1/users/**").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers(POST, "/api/v1/users/**").hasAnyRole("ADMIN")
-                                .requestMatchers(DELETE, "/api/v1/users/**").hasAnyRole("ADMIN")
+                                .requestMatchers(GET, "/api/v1/users/**").hasAuthority(Permission.USER_READ.getPermission())
+                                .requestMatchers(POST, "/api/v1/users/**").hasAuthority(Permission.USER_WRITE.getPermission())
+                                .requestMatchers(DELETE, "/api/v1/users/**").hasAuthority(Permission.USER_WRITE.getPermission())
                                 .anyRequest().authenticated())
                         //.formLogin(Customizer.withDefaults())
                         .httpBasic(Customizer.withDefaults())
@@ -47,12 +48,12 @@ public class SecurityConfig {
                 User.builder()
                         .username("admin")
                         .password(passwordEncoder().encode("admin"))
-                        .roles("ADMIN")
+                        .authorities(Role.ROLE_ADMIN.getAuthorities())
                         .build(),
                 User.builder()
                         .username("user")
                         .password(passwordEncoder().encode("user"))
-                        .roles("USER")
+                        .authorities(Role.ROLE_USER.getAuthorities())
                         .build()
 
         );
@@ -67,8 +68,4 @@ public class SecurityConfig {
     public ModelMapper modelMapper(){
         return new ModelMapper();
     }
-
-
-
-
 }

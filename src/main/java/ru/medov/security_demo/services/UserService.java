@@ -33,7 +33,7 @@ public class UserService {
 
         User user = repository.findById(id)
 
-                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("user not found with ID = " + id));
         return modelMapper.map(user, UserDto.class);
     }
 
@@ -55,4 +55,13 @@ public class UserService {
 
         return modelMapper.map(user, UserDto.class);
     }
+
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
+
+    public boolean exists(Long id) {
+        return repository.existsById(id);
+    }
+
 }
