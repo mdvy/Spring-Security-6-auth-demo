@@ -32,9 +32,9 @@ public class SecurityConfig {
                         .csrf(AbstractHttpConfigurer::disable)
                         .authorizeHttpRequests(auth->auth
                                 .requestMatchers( "/welcome").permitAll()
-                                .requestMatchers(GET, "/api/v1/users/**").hasAuthority(Permission.USER_READ.getPermission())
-                                .requestMatchers(POST, "/api/v1/users/**").hasAuthority(Permission.USER_WRITE.getPermission())
-                                .requestMatchers(DELETE, "/api/v1/users/**").hasAuthority(Permission.USER_WRITE.getPermission())
+//                                .requestMatchers(GET, "/api/v1/users/**").hasAuthority(Permission.USER_READ.getPermission())
+//                                .requestMatchers(POST, "/api/v1/users/**").hasAuthority(Permission.USER_WRITE.getPermission())
+//                                .requestMatchers(DELETE, "/api/v1/users/**").hasAuthority(Permission.USER_WRITE.getPermission())
                                 .anyRequest().authenticated())
                         //.formLogin(Customizer.withDefaults())
                         .httpBasic(Customizer.withDefaults())
