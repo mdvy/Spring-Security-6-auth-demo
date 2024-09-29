@@ -6,7 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import ru.medov.security_demo.domain.dto.UserDto;
-import ru.medov.security_demo.domain.dto.UserRequestDto;
+import ru.medov.security_demo.domain.dto.CreateUserRequestDto;
 import ru.medov.security_demo.services.UserService;
 import ru.medov.security_demo.util.RestErrorResponse;
 
@@ -35,8 +35,8 @@ public class UserRestControllerV1 {
 
     @PreAuthorize("hasAuthority('user:write')")
     @PostMapping
-    public UserDto create(@RequestBody UserRequestDto userRequestDto){
-        return userService.create(userRequestDto);
+    public UserDto create(@RequestBody CreateUserRequestDto createUserRequestDto){
+        return userService.create(createUserRequestDto);
     }
 
     @PreAuthorize("hasAuthority('user:write')")

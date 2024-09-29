@@ -13,15 +13,18 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import ru.medov.security_demo.domain.Permission;
 import ru.medov.security_demo.domain.Role;
+import ru.medov.security_demo.security.JwtTokenFilter;
 
 
 @EnableWebSecurity
@@ -32,8 +35,11 @@ public class SecurityConfig {
     @Qualifier("userDetailsServiceImpl")
     private final UserDetailsService userDetailsService;
 
-    public SecurityConfig(UserDetailsService userDetailsService) {
+    private final JwtTokenFilter jwtTokenFilter;
+
+    public SecurityConfig(UserDetailsService userDetailsService, JwtTokenFilter jwtTokenFilter) {
         this.userDetailsService = userDetailsService;
+        this.jwtTokenFilter = jwtTokenFilter;
     }
 
     @Bean
@@ -42,39 +48,42 @@ public class SecurityConfig {
                 httpSecurity
                         .csrf(AbstractHttpConfigurer::disable)
                         .authorizeHttpRequests(auth->auth
-                                .requestMatchers( "/auth/login","/css/**").permitAll()
+                                .requestMatchers("/", "/api/v1/auth/**").permitAll()
+
 
 //                                .requestMatchers(GET, "/api/v1/users/**").hasAuthority(Permission.USER_READ.getPermission())
 //                                .requestMatchers(POST, "/api/v1/users/**").hasAuthority(Permission.USER_WRITE.getPermission())
 //                                .requestMatchers(DELETE, "/api/v1/users/**").hasAuthority(Permission.USER_WRITE.getPermission())
                                 .anyRequest().authenticated())
-                        .formLogin(auth -> auth
-                                        .loginPage("/auth/login")
-                                        .defaultSuccessUrl("/auth/success"))
+//                        .formLogin(auth -> auth
+//                                        .loginPage("/auth/login")
+//                                        .defaultSuccessUrl("/auth/success"))
 //                        .httpBasic(Customizer.withDefaults())
-                        .logout(logout -> logout
-                                .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout","POST"))
-                                .invalidateHttpSession(true)
-                                .clearAuthentication(true)
-                                .deleteCookies("JSESSIONID")
-                                .logoutSuccessUrl("/auth/"))
+//                        .logout(logout -> logout
+//                                .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout","POST"))
+//                                .invalidateHttpSession(true)
+//                                .clearAuthentication(true)
+//                                .deleteCookies("JSESSIONID")
+//                                .logoutSuccessUrl("/auth/"))
+                        .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                        .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                         .build();
     }
 
 
-    @Bean
-    public AuthenticationProvider authenticationProvider(){
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
-        authenticationProvider.setUserDetailsService(userDetailsService);
-        return authenticationProvider;
-    }
-
 //    @Bean
-//    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
-//            throws Exception {
-//        return config.getAuthenticationManager();
+//    public AuthenticationProvider authenticationProvider(){
+//        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+//        authenticationProvider.setPasswordEncoder(passwordEncoder());
+//        authenticationProvider.setUserDetailsService(userDetailsService);
+//        return authenticationProvider;
 //    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+            throws Exception {
+        return config.getAuthenticationManager();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder(){

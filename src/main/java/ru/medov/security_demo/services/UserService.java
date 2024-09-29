@@ -1,17 +1,16 @@
 package ru.medov.security_demo.services;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.medov.security_demo.domain.User;
 import ru.medov.security_demo.domain.dto.UserDto;
-import ru.medov.security_demo.domain.dto.UserRequestDto;
+import ru.medov.security_demo.domain.dto.CreateUserRequestDto;
 import ru.medov.security_demo.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,11 +46,11 @@ public class UserService {
 
     }
 
-    public UserDto create(UserRequestDto userRequestDto) {
+    public UserDto create(CreateUserRequestDto createUserRequestDto) {
 
-        userRequestDto.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
+        createUserRequestDto.setPassword(passwordEncoder.encode(createUserRequestDto.getPassword()));
 
-        User user = repository.save(modelMapper.map(userRequestDto, User.class));
+        User user = repository.save(modelMapper.map(createUserRequestDto, User.class));
 
         return modelMapper.map(user, UserDto.class);
     }
@@ -62,6 +61,12 @@ public class UserService {
 
     public boolean exists(Long id) {
         return repository.existsById(id);
+    }
+
+    public UserDto findByUsername(String username){
+        User user = repository.findByUsername(username)
+                .orElseThrow(()-> new UsernameNotFoundException("user not found"));
+        return modelMapper.map(user, UserDto.class);
     }
 
 }
